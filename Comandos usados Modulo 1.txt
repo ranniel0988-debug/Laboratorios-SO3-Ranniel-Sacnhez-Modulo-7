@@ -1,0 +1,109 @@
+Comandos usados practica 2
+
+============================================
+ifconfig ens33 192.168.1.30/24
+
+ifconfig
+
+clear
+
+nmtui
+
+ifconfig
+
+ifconfig ens33 down
+
+ifconfig ens33 up
+
+ifconfig
+
+nmtui
+
+clear
+
+exi
+
+exit
+
+ifconfig
+
+ifconfig ens33 192.168.1.20/24
+
+ifconfig
+
+nmtui
+
+ifconfig
+
+============================================
+
+Comandos Practica 3
+
+============================================
+adduser
+
+adduser Cesar
+
+usermod -aG sudo Cesar
+
+groupadd guest
+
+usermod -aG guest Cesar
+
+userdel -r Cesar
+
+adduser antonio
+
+userdel -r antonio
+
+userdel cesar
+
+userdel -r antonio
+
+groupdel guest
+
+history
+============================================
+
+Comandos Practica 4
+
+============================================
+cd Desktop
+
+mkdir materia
+
+cd materia
+
+touch estudiante.txt
+
+vi estudiante.txt
+
+cat estudante.txt
+
+ls -l
+
+chmod 700 estudiante.txt
+
+ls -l
+
+chmod 070 estudiante.txt
+
+ls -l
+
+mkdir materia2
+
+cp estudiante.txt materia2
+
+cd materia 2
+
+ls
+
+cd ..
+
+cd ..
+
+rm -r materia
+
+
+
+
