@@ -1,0 +1,142 @@
+======================================
+
+Practica 1
+
+======================================
+
+sudo apt update
+
+clear
+
+sudo apt install nfs-kernel-server -y
+
+clear
+
+sudo mkdir -p /srv/OS/
+
+sudo touch /srv/OS/Andria{..}.txt
+
+ls /srv/OS/
+
+clear
+
+sudo chown -R nobody:nogroup /srv/OS/
+
+sudo chmod /srv/OS/
+
+clear
+
+sudo nano /etc/exports
+
+clear
+
+sudo exportfs -a
+
+sudo systemctl restart nfs-kernel-server
+
+sudo systemctl status nfs-kernel-server
+
+clear
+
+sudo ufw allow
+
+sudo ufw allow
+
+ip a
+
+clear
+
+sudo reboot
+
+history
+
+======================================
+
+Practica 2
+
+======================================
+
+sudo apt update
+
+clear
+
+sudo apt install samba -y
+
+clear
+
+sudo systemctl enable --now smbd
+
+sudo systemctl status --now smbd
+
+clear
+
+sudo mkdir -p /srv/samba/compartido
+
+clear
+
+sudo chown -R ranniel:ranniel /srv/samba/compartido/
+
+clear
+
+sudo chmod -
+
+sudo chmod -R /srv/samba/compartido/
+
+cd /srv/samba/compartido/
+
+clear
+
+touch adrian{..}.txt
+
+ls
+
+clear
+
+sudo nano /etc/samba/smb.conf \
+
+sudo nano /etc/samba/smb.conf
+
+clear
+
+sudo systemctl restart smbd.service
+
+clear
+
+ip a
+
+clear
+
+sudo ufw status
+
+sudo ufw disable
+
+clear
+
+ls
+
+cat adrian.txt
+
+sudo nano adrian.txt
+
+clear
+
+======================================
+
+Practica 3
+
+======================================
+sudo apt update
+sudo apt install -y samba samba-dsdb-modules samba-vfs-modules krb5-user krb5-config krb5-kdc krb5-admin-server dnsutils  
+sudo nano /etc/hosts
+sudo hostnamectl set-hostname dc.os3.inet
+sudo hostnamectl
+
+sudo nano /etc/krb5.conf  
+
+sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
+
+sudo samba-tool domain provision --use-rfc2307 --interactive
+
+systemctl restart samba ad-dc
+systemctl start smbd
+systemctl start nmbd
