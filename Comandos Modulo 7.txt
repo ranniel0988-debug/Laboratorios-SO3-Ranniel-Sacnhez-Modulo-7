@@ -1,142 +1,187 @@
 ======================================
 
-Practica 1
+Practica 1: compartir archivos entre linux utilizando NFS (1pts)
 
+Instale NFS en el servidor, cree un directorio llamado OS3 que contenga 100 archivos dentro llamados Adrian [1..100].txt que sera el directorio que se utilizara para compartir
+Asigne los permisos de carpeta y de usuario para que pueda ser acesible por otros usuarios 
+Configure los exports para definer que directorios y con que permisos seran compartidos
+En la maquina Linux cliente instale el cliente de NFS, y monte el directorio compartido desde el servidor NFS
+agrega una entrada en el archivo /etc/fstab para que el directorio compartido se monte desde que se reinicie la pc (muestre la prueba de que funciona visualizando los archivos en la VM cliente y luego reiniciando la VM y mostrando como se monta automaticamente al subir el Sistema)
 ======================================
 
+#I nstalar la herramienta en ambos servidores
 sudo apt update
-
-clear
-
 sudo apt install nfs-kernel-server -y
-
 clear
-
-sudo mkdir -p /srv/OS/
-
-sudo touch /srv/OS/Andria{..}.txt
-
+#crear el directorio a Compartir
+sudo mkdir -p /srv/OS3/
+#crear los 100 archivos en el directori0
+sudo touch /srv/OS/Andria{1..100}.txt
 ls /srv/OS/
 
 clear
-
-sudo chown -R nobody:nogroup /srv/OS/
-
-sudo chmod /srv/OS/
-
-clear
+#cambiar dueño a la carpeta 
+sudo chown -R nobody:nogroup /srv/OS3/
+#darle permisos
+sudo chmod 777 /srv/OS3/
 
 sudo nano /etc/exports
+#dentro pegar lo siguiente
+/srv/OS3 *(rw,sync,no_subtree_check)
 
-clear
-
+#Aplicar los cambios y reiniciar el servicio 
 sudo exportfs -a
-
 sudo systemctl restart nfs-kernel-server
-
 sudo systemctl status nfs-kernel-server
 
-clear
+#habilitar puertos en ambas vm
+sudo ufw allow 111
+sudo ufw allow 2049
 
-sudo ufw allow
 
-sudo ufw allow
+#en el server 2
+#crear el archivo donde se va a montar el archivo a compartir
+sudo mkdir -p /mnt/compartidos_nfs
+sudo mount 192.168.137.29:/srv/OS3 /mnt/compartidos_nfs/
 
-ip a
-
-clear
+#editar el siguiente archivo para que el montajeno se pierda
+sudo nano /etc/fstab
+#pegar lo siguiente
+192.168.137.29:/srv/OS3  /mnt/compartido_nfs  nfs  defaults,_netdev  0  0
 
 sudo reboot
 
-history
 
 ======================================
 
-Practica 2
+Practica 2: Creacion de fileserver compatible con Windows utilizando SAMBA (1Pts)
 
+Instalar SAMBA y habilitar el servicio
+Crear Carpeta Compartida, Crear Usuarios y Grupos y dar los permisos necesarios a la carpeta compartida
+En la carpata de Samba crear 100 archivos llamados adrian(adrian1, adrian2.....adrian100)
+En el sistema Windows, mapear un nuevo disco virtual y especificar la carpeta de samba como disco virtual donde se visualisaran los 100 archivos
+ingresar al archivo Adrian99 desde el disco mapeado en windows y agregar la frase "el zumzum de la carabela", guardar y regresar a la carpeta desde linux y validar que la modificacion se hara realizado satisfactoriamente. 
 ======================================
-
+#instalar samba
 sudo apt update
-
-clear
-
 sudo apt install samba -y
 
-clear
-
+#hanilitar samba
 sudo systemctl enable --now smbd
-
 sudo systemctl status --now smbd
 
-clear
-
+#crear la carpeta a compartir en la carpeta /srv
 sudo mkdir -p /srv/samba/compartido
 
-clear
-
+#cambiarle el propietario y asignar permisos
 sudo chown -R ranniel:ranniel /srv/samba/compartido/
+sudo chmod -R 777 /srv/samba/compartido/
 
-clear
-
-sudo chmod -
-
-sudo chmod -R /srv/samba/compartido/
-
+Crear los archivos a compartir
 cd /srv/samba/compartido/
+touch adrian{1..100}.txt
 
-clear
-
-touch adrian{..}.txt
-
-ls
-
-clear
-
-sudo nano /etc/samba/smb.conf \
-
+#editar el archivo de configuracion de samba
 sudo nano /etc/samba/smb.conf
+#dentro pegar lo sigte
+[SambaAdrian]
+    path = /srv/samba/compartido
+    browsable = yes
+    writable = yes
+    guest ok = yes
+    read only = no
+    force user = ranniel
+    force create mode = 0777
+    force directory mode = 0777
 
 clear
-
+#reiniciar el servicio y desabilitar ufw
 sudo systemctl restart smbd.service
+udo ufw disable
 
-clear
 
-ip a
-
-clear
-
-sudo ufw status
-
-sudo ufw disable
-
-clear
-
-ls
-
-cat adrian.txt
-
-sudo nano adrian.txt
-
-clear
 
 ======================================
 
-Practica 3
+Practica 3: Creacion de controlador de Dominio con cliente Windows (2Pts)
+
+Crea un usuario en Linux llamado lanegracubana, como contrasena su matricula y agregarlo a samba
+Crear un dominio en samba4 llamado SO3.inet
+Agregar la VM de Windows al dominio con SAMBA y que autentique con el usuario creado en el punto anterior
 
 ======================================
+#actualizar e instalar samba 4 y sus dependencias
 sudo apt update
 sudo apt install -y samba samba-dsdb-modules samba-vfs-modules krb5-user krb5-config krb5-kdc krb5-admin-server dnsutils  
-sudo nano /etc/hosts
+
+#configurar el nombre del dominio
 sudo hostnamectl set-hostname dc.os3.inet
 sudo hostnamectl
 
+
+sudo nano /etc/hosts
+#agregar debajo de local host
+192.168.137.29 dc.os3.inet
+
+#abrir el siguiente archivo de configuracion borrar todo y pegar lo sigte
 sudo nano /etc/krb5.conf  
+[libdefaults]
+    default_realm = OS3.INET
+    dns_lookup_realm = false
+    dns_lookup_kdc = true
+ 
+[realms]
+    OS3.INET = {
+        kdc = dc.os3.inet
+        admin_server = dc.os3.inet
+    }
+ 
+[domain_realm]
+    .os3.inet = OS3.INET
+    os3.inet = OS3.INET
 
 sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
 
 sudo samba-tool domain provision --use-rfc2307 --interactive
+Realm: OS3.INET
+Domain: OS3
+Server Role: dc
+DNS backend: SAMBA_INTERNAL
+DNS forwarder IP address: 8.8.8.8 
+Administrator password: Teletubies123
 
-systemctl restart samba ad-dc
+#crear usuario samba
+sudo samba-tool user create lanegracubana
+
+sudo systemctl restart samba-ad-dc
 systemctl start smbd
 systemctl start nmbd
+
+#utilizar estos comandos para evitar cualquier error
+sudo systemctl stop smbd nmbd winbind
+sudo systemctl disable smbd nmbd winbind
+sudo systemctl mask smbd nmbd winbind
+sudo systemctl restart samba-ad-dc
+sudo systemctl status samba-ad-dc
+#### en la VM de windows###:
+
+## cambiar el DNS de la maquina apor la ip de la maquina virtual
+
+Presiona Win + R, escribe sysdm.cpl y presiona Enter.
+Ir a "Nombre del equipo" > "Cambiar":
+
+Selecciona Miembro de un dominio e ingresa: os3.inet
+
+Usuario: Administrator
+Contraseña: Teletubies123
+
+sudo samba-tool domain provision --use-rfc2307 --interactive
+
+
+
+#utilizar estos comandos para evitar cualquier error
+sudo systemctl stop smbd nmbd winbind
+sudo systemctl disable smbd nmbd winbind
+sudo systemctl mask smbd nmbd winbind
+sudo systemctl restart samba-ad-dc
+sudo systemctl status samba-ad-dc
